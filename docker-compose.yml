@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  frontend:
+    container_name: service-oriented-software-frontend
+    build: frontend
+    ports:
+      - "3333:3000"
+    # environment:
+    #   - ASPNETCORE_ENVIRONMENT=Development
+    #   - ASPNETCORE_URLS=http://+:5000
+  backend:
+    container_name: service-oriented-software-backend
+    build: backend
+    # ports:
+    #   - "3000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+    depends_on:
+      - postgres
+      - redis
+  nginx:
+    container_name: service-oriented-software-proxy
+    build: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+  redis:
+    image: redis:alpine
+    container_name: service-oriented-software-redis
+    expose:
+      - "6379"
+    restart: always
+  postgres:
+    image: postgres:13-alpine
+    #image: postgres:13:alpine
+    container_name: service-oriented-software-postgres
+    restart: always
+    volumes:
+      - /home/esiole/temp:/var/lib/postgresql/data
+      #- /mnt/d/Development/PostgreSQL/13.4/data:/var/lib/postgresql/data
+      #- ./.pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    environment:
+      #- POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgadmin2
