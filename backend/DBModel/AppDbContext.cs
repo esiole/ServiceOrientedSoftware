@@ -14,9 +14,11 @@ public sealed class AppDbContext : DbContext
     public DbSet<Order> Orders { get; set; } = null!;
     public DbSet<Vendor> Vendors { get; set; } = null!;
     public DbSet<VendorTariff> VendorTariffs { get; set; } = null!;
+    public DbSet<Stats> Stats { get; set; } = null!;
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
+    { 
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         //Database.EnsureDeleted();
         Database.EnsureCreated();
     }

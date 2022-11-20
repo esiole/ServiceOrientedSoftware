@@ -1,4 +1,5 @@
 ﻿using DBModel.Interfaces;
+using DBModel.Models;
 using Services.Dto;
 using Services.Interfaces;
 
@@ -7,19 +8,21 @@ namespace Services;
 public class StatisticsService : IStatisticsService
 {
     private readonly IOrdersRepository _ordersRepository;
+    private readonly IStatsRepository _statsRepository;
     private readonly IJsonCacheService _jsonCacheService;
 
     public static readonly string StatisticCacheKey = "statistic";
 
-    public StatisticsService(IOrdersRepository ordersRepository, IJsonCacheService jsonCacheService)
+    public StatisticsService(IOrdersRepository ordersRepository, IStatsRepository statsRepository, IJsonCacheService jsonCacheService)
     {
         _ordersRepository = ordersRepository;
+        _statsRepository = statsRepository;
         _jsonCacheService = jsonCacheService;
     }
 
-    public async Task<Statistic> GetAsync()
+    public async Task<Stats> GetAsync()
     {
-        var statistic = await _jsonCacheService.GetAsync<Statistic>(StatisticCacheKey);
+        var statistic = await _jsonCacheService.GetAsync<Stats>(StatisticCacheKey);
 
         if (statistic == null)
         {
@@ -31,7 +34,7 @@ public class StatisticsService : IStatisticsService
             var cargoItems = orders.SelectMany(o => o.CargoItems).ToArray();
             int cargoItemsQty = cargoItems.Sum(i => i.Qty);
 
-            statistic = new Statistic
+            statistic = new Stats
             {
                 Qty = orders.Length,
                 AverageWeight = cargoItems.Sum(i => i.Weight * i.Qty) / (double) cargoItemsQty,
@@ -44,5 +47,16 @@ public class StatisticsService : IStatisticsService
         return statistic;
     }
 
-    public async Task Clear() => await _jsonCacheService.RemoveAsync(StatisticCacheKey);
+    public async Task<Stats[]> GetHistoryAsync() => await _statsRepository.GetAsync();
+
+    public async Task Clear()
+    {
+        var statistic = await _jsonCacheService.GetAsync<Stats>(StatisticCacheKey);
+        if (statistic != null)
+        {
+            statistic.Created = DateTime.Now;
+            await _statsRepository.AddAsync(statistic);
+            await _jsonCacheService.RemoveAsync(StatisticCacheKey);
+        }
+    }
 }

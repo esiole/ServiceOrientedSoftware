@@ -39,6 +39,7 @@ builder.Services.AddTransient<IVendorTariffsService, VendorTariffsService>();
 builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 builder.Services.AddScoped<IVendorsRepository, VendorsRepository>();
 builder.Services.AddScoped<IVendorTariffsRepository, VendorTariffsRepository>();
+builder.Services.AddScoped<IStatsRepository, StatsRepository>();
 
 var app = builder.Build();
 

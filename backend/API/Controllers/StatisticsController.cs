@@ -1,4 +1,6 @@
-﻿namespace API.Controllers;
+﻿using Services.Dto;
+
+namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -11,10 +13,17 @@ public class StatisticsController : ControllerBase
         _statisticsService = statisticsService;
     }
 
-    [HttpGet]
+    [HttpGet("current")]
     public async Task<IActionResult> Get()
     {
         var statistic = await _statisticsService.GetAsync();
+        return Ok(new Statistic(statistic));
+    }
+    
+    [HttpGet("history")]
+    public async Task<IActionResult> GetHistory()
+    {
+        var statistic = await _statisticsService.GetHistoryAsync();
         return Ok(statistic);
     }
 }
